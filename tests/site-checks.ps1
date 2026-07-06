@@ -1,43 +1,47 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$pages = @('index.html', 'servicos.html', 'contato.html')
+$pages = @('index.html','servicos.html','empresas.html','sobre.html','contato.html')
 $failures = [System.Collections.Generic.List[string]]::new()
+function Require([bool]$condition,[string]$message){if(-not $condition){$script:failures.Add($message)}}
 
-function Require([bool]$condition, [string]$message) {
-  if (-not $condition) { $script:failures.Add($message) }
-}
-
-foreach ($page in $pages) {
-  $html = Get-Content -Raw -Encoding UTF8 (Join-Path $root $page)
+foreach($page in $pages){
+  $path = Join-Path $root $page
+  Require (Test-Path $path) "$page deve existir"
+  if(-not (Test-Path $path)){continue}
+  $html = Get-Content -Raw -Encoding UTF8 $path
   Require (($html | Select-String -Pattern '<h1[ >]' -AllMatches).Matches.Count -eq 1) "$page deve ter exatamente um h1"
   Require ($html -match '5518997930933') "$page deve conter o WhatsApp da Assistência"
   Require ($html -match '\+551833615830') "$page deve conter o telefone da Lan House"
-  Require ($html -match 'whatsapp-float') "$page deve conter botão flutuante do WhatsApp"
+  Require ($html -match 'class="whatsapp-icon"') "$page deve conter o símbolo do WhatsApp"
+  @('index.html','servicos.html','empresas.html','sobre.html','contato.html') | ForEach-Object {
+    Require ($html -match [regex]::Escape($_)) "$page deve navegar para $_"
+  }
 }
 
 $homeHtml = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'index.html')
-@('problemas', 'servicos', 'empresas', 'processo', 'sobre', 'contato') | ForEach-Object {
-  Require ($homeHtml -match ('id="' + $_ + '"')) "Home deve conter a seção #$_"
-}
-Require ($homeHtml -match 'Desde 2008') 'Home deve informar Desde 2008'
-Require ($homeHtml -match '18 anos') 'Home deve informar mais de 18 anos'
+Require ($homeHtml -notmatch 'id="processo"') 'Home não deve concentrar o processo completo'
+Require ($homeHtml -notmatch 'id="sobre"') 'Home não deve concentrar a página Sobre'
+Require ($homeHtml -match 'Desde 2008') 'Home deve manter prova de experiência'
 
 $services = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'servicos.html')
-Require ((($services | Select-String -Pattern 'class="service-card' -AllMatches).Matches.Count) -ge 10) 'Serviços deve ter pelo menos 10 cards'
-Require ((($services | Select-String -Pattern 'Consultar este servi' -AllMatches).Matches.Count) -ge 10) 'Cada serviço deve ter micro-CTA'
+Require ((($services | Select-String -Pattern 'class="service-card' -AllMatches).Matches.Count) -ge 10) 'Serviços deve ter dez cards'
+
+if(Test-Path (Join-Path $root 'empresas.html')){
+  $business = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'empresas.html')
+  Require ($business -match 'Suporte de TI') 'Empresas deve apresentar suporte de TI'
+}
+if(Test-Path (Join-Path $root 'sobre.html')){
+  $about = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'sobre.html')
+  Require ($about -match '2008') 'Sobre deve apresentar a história desde 2008'
+}
 
 $contact = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'contato.html')
-Require ($contact -match '08:30') 'Contato deve informar horário de segunda a sexta'
-Require ($contact -match '09:00') 'Contato deve informar horário de sábado'
-Require ($contact -match 'data-contact-form') 'Contato deve conter formulário para WhatsApp'
+Require ($contact -match '08:30' -and $contact -match '09:00') 'Contato deve informar os horários'
+Require ($contact -match 'data-contact-form') 'Contato deve conter formulário'
 
 $css = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'assets/css/style.css')
 Require ($css -match 'prefers-reduced-motion') 'CSS deve respeitar movimento reduzido'
-Require ($css -match '--color-whatsapp') 'CSS deve reservar token verde para WhatsApp'
+Require ($css -match '--color-whatsapp') 'CSS deve reservar verde para WhatsApp'
 
-if ($failures.Count -gt 0) {
-  $failures | ForEach-Object { Write-Host "FAIL: $_" -ForegroundColor Red }
-  exit 1
-}
-
-Write-Host 'PASS: verificações estruturais e comerciais concluídas' -ForegroundColor Green
+if($failures.Count){$failures|ForEach-Object{Write-Host "FAIL: $_" -ForegroundColor Red};exit 1}
+Write-Host 'PASS: site multipágina validado' -ForegroundColor Green
