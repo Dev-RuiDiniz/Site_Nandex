@@ -26,19 +26,24 @@ Require ($homeHtml -notmatch 'id="sobre"') 'Home não deve concentrar a página 
 Require ($homeHtml -match 'Desde 2008') 'Home deve manter prova de experiência'
 Require ($homeHtml -match 'Tecnologia travou') 'Home deve usar a nova headline editorial'
 Require ($homeHtml -notmatch 'Seu computador, notebook ou rede parou') 'Home não deve manter a headline genérica anterior'
+Require ($homeHtml -match 'imagem_03\.webp') 'Home deve usar a imagem editorial da bancada técnica'
+Require ($homeHtml -match 'fetchpriority="high"') 'Imagem principal da Home deve ter prioridade alta'
 
 $services = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'servicos.html')
 Require ((($services | Select-String -Pattern 'class="service-card' -AllMatches).Matches.Count) -ge 10) 'Serviços deve ter dez cards'
+Require ($services -match 'imagem_01\.webp') 'Serviços deve usar a imagem editorial de hardware'
 
 if(Test-Path (Join-Path $root 'empresas.html')){
   $business = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'empresas.html')
   Require ($business -match 'Suporte de TI') 'Empresas deve apresentar suporte de TI'
   Require ($business -match 'Toda parada custa') 'Empresas deve usar copy orientada ao impacto operacional'
+  Require ($business -match 'imagem_04\.webp') 'Empresas deve usar a imagem editorial de redes'
 }
 if(Test-Path (Join-Path $root 'sobre.html')){
   $about = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'sobre.html')
   Require ($about -match '2008') 'Sobre deve apresentar a história desde 2008'
   Require ($about -match 'tecnologia tem que simplificar') 'Sobre deve usar a nova voz editorial'
+  Require ($about -match 'imagem_02\.webp') 'Sobre deve usar a imagem editorial institucional'
 }
 
 $contact = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'contato.html')
@@ -51,6 +56,7 @@ Require ($css -match 'prefers-reduced-motion') 'CSS deve respeitar movimento red
 Require ($css -match '--color-whatsapp') 'CSS deve reservar verde para WhatsApp'
 Require ($css -match '--font-display') 'CSS deve declarar token de fonte display'
 Require ($css -match '--font-body') 'CSS deve declarar token de fonte de leitura'
+Require ($css -match '\.editorial-media') 'CSS deve definir o painel editorial compartilhado'
 
 if($failures.Count){$failures|ForEach-Object{Write-Host "FAIL: $_" -ForegroundColor Red};exit 1}
 Write-Host 'PASS: site multipágina validado' -ForegroundColor Green
