@@ -1,0 +1,11 @@
+<svg width="640" height="180" viewBox="0 0 640 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Nandex Informática e Tecnologia</title>
+  <desc id="desc">Logotipo conceitual para rebranding da Nandex</desc>
+  <rect width="640" height="180" rx="32" fill="#F8FAFC"/>
+  <circle cx="92" cy="90" r="54" fill="#0EA5E9" opacity="0.12"/>
+  <path d="M63 117L88 63L113 117" stroke="#0F172A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M75 95H102" stroke="#0EA5E9" stroke-width="12" stroke-linecap="round"/>
+  <path d="M126 63L169 117M169 63L126 117" stroke="#0EA5E9" stroke-width="12" stroke-linecap="round"/>
+  <text x="205" y="87" font-family="Inter, Arial, sans-serif" font-size="48" font-weight="800" fill="#0F172A">Nandex</text>
+  <text x="207" y="126" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="600" fill="#475569">Informática e Tecnologia</text>
+</svg>
